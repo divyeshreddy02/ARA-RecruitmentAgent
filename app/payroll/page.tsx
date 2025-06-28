@@ -1,76 +1,188 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DollarSign, Users, Calculator, FileText, Download, Filter, Search } from "lucide-react"
-import { mockEmployees, mockPayrollData } from "@/lib/mock-data"
+import {
+  DollarSign,
+  Users,
+  Calculator,
+  FileText,
+  Download,
+  Eye,
+  TrendingUp,
+  Building,
+  CreditCard,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react"
+import { mockEmployees, mockPayrollData, getCandidateById } from "@/lib/mock-data"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
-export default function Payroll() {
+export default function PayrollManagement() {
+  const [selectedEmployee, setSelectedEmployee] = useState(null)
+  const [isProcessPayrollOpen, setIsProcessPayrollOpen] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const employeeId = searchParams.get("employeeId")
+    if (employeeId) {
+      const employee = mockEmployees.find((e) => e.employeeId === employeeId)
+      if (employee) setSelectedEmployee(employee)
+    }
+  }, [searchParams])
+
   const employees = mockEmployees
+  const payrollData = mockPayrollData
 
-  const monthlyPayroll = mockPayrollData
+  const totalPayroll = payrollData.reduce((sum, emp) => sum + emp.netPay, 0)
+  const totalDeductions = payrollData.reduce((sum, emp) => sum + emp.totalDeductions, 0)
 
-  const payrollSummary = {
-    totalEmployees: 4,
-    totalSalaries: 9500000, // ₹95L total
-    totalDeductions: 1425000, // ₹14.25L total
-    totalNetPay: 8075000, // ₹80.75L total
-    averageSalary: 2375000, // ₹23.75L average
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Payroll Management</h1>
-        <p className="text-muted-foreground">Manage employee salaries, deductions, and generate payslips</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Payroll Management</h1>
+          <p className="text-muted-foreground">Manage employee salaries, deductions, and payroll processing</p>
+        </div>
+        <Dialog open={isProcessPayrollOpen} onOpenChange={setIsProcessPayrollOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Calculator className="h-4 w-4 mr-2" />
+              Process Payroll
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Process Monthly Payroll</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Pay Period</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pay period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feb-2024">February 2024</SelectItem>
+                    <SelectItem value="jan-2024">January 2024</SelectItem>
+                    <SelectItem value="dec-2023">December 2023</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Payroll Summary</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total Employees:</span>
+                    <span className="font-medium">{employees.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Gross Payroll:</span>
+                    <span className="font-medium">{formatCurrency(totalPayroll + totalDeductions)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Deductions:</span>
+                    <span className="font-medium">{formatCurrency(totalDeductions)}</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Net Payroll:</span>
+                    <span>{formatCurrency(totalPayroll)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsProcessPayrollOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setIsProcessPayrollOpen(false)}>Process Payroll</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Payroll Overview */}
+      {/* Payroll Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{payrollSummary.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">Active employees</p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
+                <p className="text-2xl font-bold">{employees.length}</p>
+              </div>
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Active payroll</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Salaries</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{(payrollSummary.totalSalaries / 100000).toFixed(1)}L</div>
-            <p className="text-xs text-muted-foreground">Annual gross pay</p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Monthly Payroll</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalPayroll).replace("₹", "₹")}</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Net amount</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Deductions</CardTitle>
-            <Calculator className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{(payrollSummary.totalDeductions / 100000).toFixed(1)}L</div>
-            <p className="text-xs text-muted-foreground">Annual deductions</p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Deductions</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalDeductions).replace("₹", "₹")}</p>
+              </div>
+              <Calculator className="h-8 w-8 text-orange-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">PF, ESI, Tax</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Payroll</CardTitle>
-            <FileText className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{(payrollSummary.totalNetPay / 100000).toFixed(1)}L</div>
-            <p className="text-xs text-muted-foreground">Annual net pay</p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg. Salary</p>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(totalPayroll / employees.length).replace("₹", "₹")}
+                </p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Per employee</p>
           </CardContent>
         </Card>
       </div>
@@ -78,36 +190,15 @@ export default function Payroll() {
       <Tabs defaultValue="employees" className="space-y-4">
         <TabsList>
           <TabsTrigger value="employees">Employee Payroll</TabsTrigger>
-          <TabsTrigger value="monthly">Monthly Processing</TabsTrigger>
+          <TabsTrigger value="payslips">Payslips</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="employees" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Employee Payroll Overview</CardTitle>
-                <div className="flex gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search employees..." className="pl-10 w-64" />
-                  </div>
-                  <Select defaultValue="all-departments">
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all-departments">All Departments</SelectItem>
-                      <SelectItem value="engineering">Engineering</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              <CardTitle>Employee Payroll Overview</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -115,7 +206,7 @@ export default function Payroll() {
                   <TableRow>
                     <TableHead>Employee</TableHead>
                     <TableHead>Department</TableHead>
-                    <TableHead>Annual Salary</TableHead>
+                    <TableHead>Base Salary</TableHead>
                     <TableHead>Deductions</TableHead>
                     <TableHead>Net Pay</TableHead>
                     <TableHead>Status</TableHead>
@@ -123,116 +214,76 @@ export default function Payroll() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {employees.map((employee) => (
-                    <TableRow key={employee.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{employee.name}</p>
-                          <p className="text-sm text-muted-foreground">{employee.position}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{employee.department}</TableCell>
-                      <TableCell>₹{(employee.salary / 100000).toFixed(1)}L</TableCell>
-                      <TableCell>₹{(employee.deductions / 100000).toFixed(1)}L</TableCell>
-                      <TableCell className="font-medium">₹{(employee.netPay / 100000).toFixed(1)}L</TableCell>
-                      <TableCell>
-                        <Badge variant={employee.status === "Active" ? "default" : "secondary"}>
-                          {employee.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Payslip
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {employees.map((employee) => {
+                    const candidate = getCandidateById(employee.candidateId)
+                    return (
+                      <TableRow key={employee.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{employee.name}</p>
+                            <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
+                            <p className="text-xs text-blue-600">{employee.position}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Building className="h-3 w-3" />
+                            {employee.department}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />
+                            {formatCurrency(employee.salary)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Calculator className="h-3 w-3" />
+                            {formatCurrency(employee.deductions)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <CreditCard className="h-3 w-3" />
+                            <span className="font-medium">{formatCurrency(employee.netPay)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={employee.status === "Active" ? "default" : "secondary"}>
+                            {employee.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployee(employee)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            {candidate && (
+                              <Link href={`/candidates?candidateId=${candidate.id}`}>
+                                <Button variant="ghost" size="sm">
+                                  Profile
+                                </Button>
+                              </Link>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="monthly" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payroll Processing</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Pay Period</label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="jan-2024">January 2024</SelectItem>
-                        <SelectItem value="feb-2024">February 2024</SelectItem>
-                        <SelectItem value="mar-2024">March 2024</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Department</label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All departments" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Departments</SelectItem>
-                        <SelectItem value="engineering">Engineering</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Button className="w-full">Process Payroll</Button>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Payroll Data
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Employees to Process</span>
-                  <span className="font-semibold">4</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Total Gross Pay</span>
-                  <span className="font-semibold">₹5,21,667</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Total Deductions</span>
-                  <span className="font-semibold">₹84,583</span>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="font-medium">Total Net Pay</span>
-                  <span className="font-bold">₹4,37,084</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
+        <TabsContent value="payslips" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Payroll Details</CardTitle>
+              <CardTitle>Monthly Payslips - January 2024</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -240,8 +291,8 @@ export default function Payroll() {
                   <TableRow>
                     <TableHead>Employee</TableHead>
                     <TableHead>Base Salary</TableHead>
+                    <TableHead>Allowances</TableHead>
                     <TableHead>Overtime</TableHead>
-                    <TableHead>Bonus</TableHead>
                     <TableHead>Gross Pay</TableHead>
                     <TableHead>Deductions</TableHead>
                     <TableHead>Net Pay</TableHead>
@@ -249,19 +300,36 @@ export default function Payroll() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {monthlyPayroll.map((payroll, index) => (
+                  {payrollData.map((payroll, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{payroll.employee}</TableCell>
-                      <TableCell>₹{payroll.baseSalary.toLocaleString("en-IN")}</TableCell>
-                      <TableCell>₹{payroll.overtime.toLocaleString("en-IN")}</TableCell>
-                      <TableCell>₹{payroll.bonus.toLocaleString("en-IN")}</TableCell>
-                      <TableCell>₹{payroll.grossPay.toLocaleString("en-IN")}</TableCell>
-                      <TableCell>₹{payroll.totalDeductions.toLocaleString("en-IN")}</TableCell>
-                      <TableCell className="font-medium">₹{payroll.netPay.toLocaleString("en-IN")}</TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm">
-                          Generate Payslip
-                        </Button>
+                        <div>
+                          <p className="font-medium">{payroll.employee}</p>
+                          <p className="text-sm text-muted-foreground">{payroll.employeeId}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatCurrency(payroll.baseSalary)}</TableCell>
+                      <TableCell>{formatCurrency(payroll.allowances)}</TableCell>
+                      <TableCell>{formatCurrency(payroll.overtime)}</TableCell>
+                      <TableCell className="font-medium">{formatCurrency(payroll.grossPay)}</TableCell>
+                      <TableCell className="text-red-600">{formatCurrency(payroll.totalDeductions)}</TableCell>
+                      <TableCell className="font-bold text-green-600">{formatCurrency(payroll.netPay)}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          {payroll.candidateId && (
+                            <Link href={`/candidates?candidateId=${payroll.candidateId}`}>
+                              <Button variant="ghost" size="sm">
+                                Profile
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -272,33 +340,275 @@ export default function Payroll() {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="cursor-pointer hover:bg-gray-50">
-              <CardContent className="p-6 text-center">
-                <FileText className="h-12 w-12 mx-auto text-blue-600 mb-4" />
-                <h3 className="font-medium mb-2">Payroll Summary</h3>
-                <p className="text-sm text-muted-foreground">Generate monthly payroll summary report</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Department-wise Payroll</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.entries(
+                  employees.reduce(
+                    (acc, emp) => {
+                      acc[emp.department] = (acc[emp.department] || 0) + emp.netPay
+                      return acc
+                    },
+                    {} as Record<string, number>,
+                  ),
+                )
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([department, total]) => (
+                    <div key={department} className="flex items-center justify-between">
+                      <span className="font-medium">{department}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-gray-200 rounded-full">
+                          <div
+                            className="h-2 bg-blue-600 rounded-full"
+                            style={{
+                              width: `${
+                                (total /
+                                  Math.max(
+                                    ...Object.values(
+                                      employees.reduce(
+                                        (acc, emp) => {
+                                          acc[emp.department] = (acc[emp.department] || 0) + emp.netPay
+                                          return acc
+                                        },
+                                        {} as Record<string, number>,
+                                      ),
+                                    ),
+                                  )) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <span className="font-bold text-sm">{formatCurrency(total)}</span>
+                      </div>
+                    </div>
+                  ))}
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:bg-gray-50">
-              <CardContent className="p-6 text-center">
-                <Calculator className="h-12 w-12 mx-auto text-green-600 mb-4" />
-                <h3 className="font-medium mb-2">Tax Report</h3>
-                <p className="text-sm text-muted-foreground">Generate tax deduction and compliance report</p>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:bg-gray-50">
-              <CardContent className="p-6 text-center">
-                <DollarSign className="h-12 w-12 mx-auto text-purple-600 mb-4" />
-                <h3 className="font-medium mb-2">Cost Analysis</h3>
-                <p className="text-sm text-muted-foreground">Analyze payroll costs by department</p>
+            <Card>
+              <CardHeader>
+                <CardTitle>Payroll Trends</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span>January 2024</span>
+                  <span className="font-bold">{formatCurrency(totalPayroll)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>December 2023</span>
+                  <span className="font-bold">{formatCurrency(totalPayroll * 0.95)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>November 2023</span>
+                  <span className="font-bold">{formatCurrency(totalPayroll * 0.92)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>October 2023</span>
+                  <span className="font-bold">{formatCurrency(totalPayroll * 0.88)}</span>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between items-center text-green-600">
+                    <span className="font-medium">Growth Rate</span>
+                    <span className="font-bold">+8.2%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Payroll Reports</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <FileText className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <p className="font-medium">Monthly Payroll Report</p>
+                    <p className="text-sm text-muted-foreground">Detailed breakdown by employee</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <Calculator className="h-8 w-8 text-green-600" />
+                  <div>
+                    <p className="font-medium">Tax Deduction Report</p>
+                    <p className="text-sm text-muted-foreground">TDS and tax calculations</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <Building className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <p className="font-medium">PF & ESI Report</p>
+                    <p className="text-sm text-muted-foreground">Statutory compliance report</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="compliance" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Compliance Dashboard
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">PF Compliance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600 mb-2">100%</div>
+                      <p className="text-sm text-muted-foreground">All employees enrolled</p>
+                      <Badge variant="default" className="mt-2">
+                        Compliant
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">ESI Compliance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600 mb-2">100%</div>
+                      <p className="text-sm text-muted-foreground">All eligible employees</p>
+                      <Badge variant="default" className="mt-2">
+                        Compliant
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">TDS Filing</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600 mb-2">Pending</div>
+                      <p className="text-sm text-muted-foreground">Due: 15th Feb</p>
+                      <Badge variant="destructive" className="mt-2">
+                        Action Required
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-4">Statutory Requirements</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Form 16 Generation</span>
+                    </div>
+                    <Badge variant="default">Completed</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>PF Monthly Returns</span>
+                    </div>
+                    <Badge variant="default">Filed</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="h-4 w-4 text-orange-600" />
+                      <span>ESI Monthly Returns</span>
+                    </div>
+                    <Badge variant="destructive">Due Soon</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Professional Tax</span>
+                    </div>
+                    <Badge variant="default">Paid</Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Employee Detail Modal */}
+      {selectedEmployee && (
+        <Dialog open={!!selectedEmployee} onOpenChange={() => setSelectedEmployee(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Payroll Details - {selectedEmployee.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Employee Information</Label>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p>
+                      <strong>Name:</strong> {selectedEmployee.name}
+                    </p>
+                    <p>
+                      <strong>ID:</strong> {selectedEmployee.employeeId}
+                    </p>
+                    <p>
+                      <strong>Position:</strong> {selectedEmployee.position}
+                    </p>
+                    <p>
+                      <strong>Department:</strong> {selectedEmployee.department}
+                    </p>
+                    <p>
+                      <strong>Joining Date:</strong> {selectedEmployee.joiningDate}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Salary Breakdown</Label>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p>
+                      <strong>Base Salary:</strong> {formatCurrency(selectedEmployee.salary)}
+                    </p>
+                    <p>
+                      <strong>Deductions:</strong> {formatCurrency(selectedEmployee.deductions)}
+                    </p>
+                    <p>
+                      <strong>Net Pay:</strong> {formatCurrency(selectedEmployee.netPay)}
+                    </p>
+                    <p>
+                      <strong>Bank Account:</strong> {selectedEmployee.bankAccount}
+                    </p>
+                    <p>
+                      <strong>PAN:</strong> {selectedEmployee.panNumber}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Payslip
+                </Button>
+                <Button variant="outline" onClick={() => setSelectedEmployee(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

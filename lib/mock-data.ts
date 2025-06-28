@@ -17,6 +17,9 @@ export const mockJobs = [
     requirements: ["React.js", "Node.js", "MongoDB", "AWS", "TypeScript"],
     applicationsToday: 8,
     viewsToday: 45,
+    urgency: "High",
+    hiringManager: "Amit Kumar",
+    budget: 2500000,
   },
   {
     id: 2,
@@ -34,6 +37,9 @@ export const mockJobs = [
     requirements: ["Digital Marketing", "SEO/SEM", "Analytics", "Social Media", "Content Strategy"],
     applicationsToday: 12,
     viewsToday: 67,
+    urgency: "Medium",
+    hiringManager: "Kavya Sharma",
+    budget: 1500000,
   },
   {
     id: 3,
@@ -50,6 +56,9 @@ export const mockJobs = [
     requirements: ["Figma", "User Research", "Prototyping", "Design Systems", "Fintech Experience"],
     applicationsToday: 5,
     viewsToday: 32,
+    urgency: "Medium",
+    hiringManager: "Ravi Gupta",
+    budget: 1800000,
   },
   {
     id: 4,
@@ -66,6 +75,28 @@ export const mockJobs = [
     requirements: ["AWS", "Docker", "Kubernetes", "Jenkins", "Terraform"],
     applicationsToday: 0,
     viewsToday: 8,
+    urgency: "Low",
+    hiringManager: "Suresh Patel",
+    budget: 2000000,
+  },
+  {
+    id: 5,
+    title: "Product Manager",
+    department: "Product",
+    location: "Bangalore, Karnataka",
+    type: "Full-time",
+    salary: "₹20L - ₹30L",
+    status: "Active",
+    resumesReceived: 78,
+    posted: "2024-01-14",
+    platforms: ["LinkedIn", "AngelList", "Company Site"],
+    description: "Lead product strategy and execution for our core fintech platform.",
+    requirements: ["Product Management", "Fintech", "Analytics", "Strategy", "Leadership"],
+    applicationsToday: 6,
+    viewsToday: 34,
+    urgency: "High",
+    hiringManager: "Priya Sharma",
+    budget: 2500000,
   },
 ]
 
@@ -77,6 +108,7 @@ export const mockCandidates = [
     phone: "+91 98765 43210",
     position: "Senior Full Stack Developer",
     appliedFor: "Senior Full Stack Developer",
+    jobId: 1,
     experience: "6 years",
     location: "Bangalore, Karnataka",
     currentCompany: "TechCorp Solutions",
@@ -120,6 +152,13 @@ export const mockCandidates = [
           "Led the migration from monolithic to microservices architecture, reducing deployment time by 80% and improving system reliability to 99.9% uptime.",
       },
     ],
+    timeline: [
+      { date: "2024-01-15", event: "Application Received", status: "completed" },
+      { date: "2024-01-16", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-18", event: "HR Pre-screening", status: "completed" },
+      { date: "2024-01-25", event: "Technical Interview", status: "scheduled" },
+      { date: "2024-01-27", event: "Final Round", status: "pending" },
+    ],
   },
   {
     id: 2,
@@ -128,6 +167,7 @@ export const mockCandidates = [
     phone: "+91 87654 32109",
     position: "Digital Marketing Manager",
     appliedFor: "Digital Marketing Manager",
+    jobId: 2,
     experience: "5 years",
     location: "Mumbai, Maharashtra",
     currentCompany: "Digital Dynamics",
@@ -174,6 +214,13 @@ export const mockCandidates = [
           "I use a data-driven approach with A/B testing, continuous monitoring of key metrics, and regular optimization based on performance insights.",
       },
     ],
+    timeline: [
+      { date: "2024-01-12", event: "Application Received", status: "completed" },
+      { date: "2024-01-13", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-15", event: "HR Pre-screening", status: "completed" },
+      { date: "2024-01-20", event: "Portfolio Review", status: "completed" },
+      { date: "2024-01-25", event: "Final Interview", status: "scheduled" },
+    ],
   },
   {
     id: 3,
@@ -182,6 +229,7 @@ export const mockCandidates = [
     phone: "+91 76543 21098",
     position: "Senior UX Designer",
     appliedFor: "Senior UX Designer",
+    jobId: 3,
     experience: "4 years",
     location: "Hyderabad, Telangana",
     currentCompany: "Design Studio Pro",
@@ -227,6 +275,13 @@ export const mockCandidates = [
           "I start with understanding business goals, then conduct user interviews, surveys, and usability testing to gather insights that inform design decisions.",
       },
     ],
+    timeline: [
+      { date: "2024-01-14", event: "Application Received", status: "completed" },
+      { date: "2024-01-15", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-17", event: "HR Pre-screening", status: "completed" },
+      { date: "2024-01-26", event: "Portfolio Review", status: "scheduled" },
+      { date: "2024-01-28", event: "Final Round", status: "pending" },
+    ],
   },
   {
     id: 4,
@@ -235,6 +290,7 @@ export const mockCandidates = [
     phone: "+91 65432 10987",
     position: "DevOps Engineer",
     appliedFor: "DevOps Engineer",
+    jobId: 4,
     experience: "3 years",
     location: "Pune, Maharashtra",
     currentCompany: "CloudTech Solutions",
@@ -271,6 +327,12 @@ export const mockCandidates = [
           "I've worked with Kubernetes for 2 years, managing deployments, services, and ingress controllers. I've set up monitoring with Prometheus and handled scaling challenges.",
       },
     ],
+    timeline: [
+      { date: "2024-01-16", event: "Application Received", status: "completed" },
+      { date: "2024-01-17", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-27", event: "Technical Screening", status: "scheduled" },
+      { date: "2024-01-30", event: "Final Round", status: "pending" },
+    ],
   },
   {
     id: 5,
@@ -279,6 +341,7 @@ export const mockCandidates = [
     phone: "+91 54321 09876",
     position: "Senior Full Stack Developer",
     appliedFor: "Senior Full Stack Developer",
+    jobId: 1,
     experience: "7 years",
     location: "Delhi, NCR",
     currentCompany: "Enterprise Solutions Ltd",
@@ -311,6 +374,50 @@ export const mockCandidates = [
           "I prioritize technical debt based on business impact, allocate dedicated time in sprints for refactoring, and ensure team awareness of long-term consequences.",
       },
     ],
+    timeline: [
+      { date: "2024-01-08", event: "Application Received", status: "completed" },
+      { date: "2024-01-09", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-11", event: "HR Pre-screening", status: "completed" },
+      { date: "2024-01-18", event: "Technical Interview", status: "completed" },
+      { date: "2024-01-22", event: "Final Round", status: "completed" },
+      { date: "2024-01-23", event: "Offer Extended", status: "completed" },
+      { date: "2024-01-24", event: "Offer Accepted", status: "completed" },
+    ],
+  },
+  {
+    id: 6,
+    name: "Meera Krishnan",
+    email: "meera.krishnan@email.com",
+    phone: "+91 98765 12345",
+    position: "Product Manager",
+    appliedFor: "Product Manager",
+    jobId: 5,
+    experience: "6 years",
+    location: "Bangalore, Karnataka",
+    currentCompany: "FinTech Innovations",
+    currentSalary: "₹18L",
+    expectedSalary: "₹24L",
+    noticePeriod: "2 months",
+    score: 91,
+    status: "Hired",
+    appliedDate: "2024-01-10",
+    source: "LinkedIn",
+    resumeText:
+      "Product Manager with 6 years of experience in fintech and B2B SaaS. Led product launches that generated ₹10Cr+ revenue. Expert in product strategy, user research, and cross-functional team leadership.",
+    skills: ["Product Strategy", "User Research", "Analytics", "Fintech", "Agile", "Leadership", "SQL"],
+    education: "MBA - IIM Bangalore (2018)",
+    summary: "Strategic product leader with proven track record in fintech and strong analytical skills.",
+    matchPercentage: 93,
+    interviewSummary: "Outstanding candidate with perfect fit for our product vision. Hired immediately.",
+    timeline: [
+      { date: "2024-01-10", event: "Application Received", status: "completed" },
+      { date: "2024-01-11", event: "ATS Screening Passed", status: "completed" },
+      { date: "2024-01-13", event: "HR Pre-screening", status: "completed" },
+      { date: "2024-01-19", event: "Product Case Study", status: "completed" },
+      { date: "2024-01-24", event: "Final Round", status: "completed" },
+      { date: "2024-01-25", event: "Offer Extended", status: "completed" },
+      { date: "2024-01-26", event: "Offer Accepted", status: "completed" },
+    ],
   },
 ]
 
@@ -320,6 +427,7 @@ export const mockInterviews = [
     candidateId: 1,
     candidateName: "Rahul Sharma",
     position: "Senior Full Stack Developer",
+    jobId: 1,
     date: "2024-01-25",
     time: "2:00 PM",
     mode: "Virtual",
@@ -332,12 +440,19 @@ export const mockInterviews = [
     notes: "Focus on system design and React expertise",
     round: 2,
     totalRounds: 3,
+    questions: [
+      "Explain microservices architecture",
+      "How do you handle state management in React?",
+      "Design a scalable chat application",
+      "What's your approach to code reviews?",
+    ],
   },
   {
     id: 2,
     candidateId: 2,
     candidateName: "Priya Patel",
     position: "Digital Marketing Manager",
+    jobId: 2,
     date: "2024-01-25",
     time: "4:00 PM",
     mode: "In-Person",
@@ -350,12 +465,19 @@ export const mockInterviews = [
     notes: "Present campaign case study",
     round: 3,
     totalRounds: 3,
+    questions: [
+      "Present your best campaign performance",
+      "How do you measure marketing ROI?",
+      "Strategy for our target market",
+      "Team leadership experience",
+    ],
   },
   {
     id: 3,
     candidateId: 3,
     candidateName: "Arjun Mehta",
     position: "Senior UX Designer",
+    jobId: 3,
     date: "2024-01-26",
     time: "10:00 AM",
     mode: "Virtual",
@@ -368,12 +490,19 @@ export const mockInterviews = [
     notes: "Portfolio presentation and design process discussion",
     round: 2,
     totalRounds: 3,
+    questions: [
+      "Walk through your design process",
+      "How do you handle user feedback?",
+      "Design a mobile banking app",
+      "Collaboration with developers",
+    ],
   },
   {
     id: 4,
     candidateId: 4,
     candidateName: "Sneha Reddy",
     position: "DevOps Engineer",
+    jobId: 4,
     date: "2024-01-27",
     time: "11:00 AM",
     mode: "Phone",
@@ -385,6 +514,12 @@ export const mockInterviews = [
     notes: "AWS and Kubernetes knowledge assessment",
     round: 1,
     totalRounds: 2,
+    questions: [
+      "Kubernetes deployment strategies",
+      "AWS cost optimization",
+      "CI/CD pipeline setup",
+      "Monitoring and alerting",
+    ],
   },
 ]
 
@@ -394,6 +529,7 @@ export const mockCompletedInterviews = [
     candidateId: 5,
     candidateName: "Vikram Singh",
     position: "Senior Full Stack Developer",
+    jobId: 1,
     date: "2024-01-22",
     interviewer: "Amit Kumar (CTO)",
     result: "Passed",
@@ -407,12 +543,20 @@ export const mockCompletedInterviews = [
     },
     nextSteps: "Offer extended - awaiting response",
     round: "Final Round",
+    duration: "75 minutes",
+    questionsAsked: [
+      "System design for e-commerce platform",
+      "Microservices vs monolith trade-offs",
+      "Team leadership scenarios",
+      "Career goals and expectations",
+    ],
   },
   {
     id: 2,
     candidateId: 6,
     candidateName: "Anita Joshi",
     position: "Digital Marketing Manager",
+    jobId: 2,
     date: "2024-01-20",
     interviewer: "Kavya Sharma (Marketing Head)",
     result: "Rejected",
@@ -427,12 +571,20 @@ export const mockCompletedInterviews = [
     },
     nextSteps: "Candidate informed about decision",
     round: "Second Round",
+    duration: "45 minutes",
+    questionsAsked: [
+      "B2B marketing experience",
+      "Lead generation strategies",
+      "Marketing automation tools",
+      "Budget management",
+    ],
   },
   {
     id: 3,
     candidateId: 7,
     candidateName: "Karthik Nair",
     position: "Senior UX Designer",
+    jobId: 3,
     date: "2024-01-18",
     interviewer: "Ravi Gupta (Design Lead)",
     result: "Passed",
@@ -446,6 +598,40 @@ export const mockCompletedInterviews = [
     },
     nextSteps: "Final round scheduled for next week",
     round: "Portfolio Review",
+    duration: "90 minutes",
+    questionsAsked: [
+      "Design process walkthrough",
+      "User research methodologies",
+      "Design system creation",
+      "Cross-functional collaboration",
+    ],
+  },
+  {
+    id: 4,
+    candidateId: 6,
+    candidateName: "Meera Krishnan",
+    position: "Product Manager",
+    jobId: 5,
+    date: "2024-01-24",
+    interviewer: "Priya Sharma (Head of Product)",
+    result: "Passed",
+    score: 9.5,
+    notes: "Exceptional product sense, strong analytical skills, perfect cultural fit. Immediate hire recommendation.",
+    feedback: {
+      technical: 10,
+      communication: 9,
+      problemSolving: 10,
+      culturalFit: 9,
+    },
+    nextSteps: "Offer extended and accepted",
+    round: "Final Round",
+    duration: "60 minutes",
+    questionsAsked: [
+      "Product strategy case study",
+      "Data-driven decision making",
+      "Stakeholder management",
+      "Product roadmap planning",
+    ],
   },
 ]
 
@@ -465,6 +651,8 @@ export const mockOnboardingEmployees = [
     buddy: "Rahul Sharma",
     salary: "₹25L",
     employeeId: "EMP001",
+    candidateId: 5,
+    jobId: 1,
     documents: {
       contract: "Completed",
       taxForms: "Completed",
@@ -474,16 +662,16 @@ export const mockOnboardingEmployees = [
       backgroundCheck: "Completed",
     },
     tasks: [
-      { task: "Sign employment contract", status: "Completed", dueDate: "2024-01-30" },
-      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-02-01" },
-      { task: "Complete Form 16 submission", status: "Completed", dueDate: "2024-02-01" },
-      { task: "Read employee handbook", status: "Completed", dueDate: "2024-02-02" },
+      { task: "Sign employment contract", status: "Completed", dueDate: "2024-01-30", completedDate: "2024-01-29" },
+      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "Complete Form 16 submission", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "Read employee handbook", status: "Completed", dueDate: "2024-02-02", completedDate: "2024-02-02" },
       { task: "IT equipment setup", status: "In Progress", dueDate: "2024-02-03" },
       { task: "Security training completion", status: "Pending", dueDate: "2024-02-05" },
-      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-02-01" },
-      { task: "PF and ESI enrollment", status: "Completed", dueDate: "2024-02-02" },
-      { task: "Set up salary account", status: "Completed", dueDate: "2024-02-01" },
-      { task: "Emergency contact form", status: "Completed", dueDate: "2024-02-01" },
+      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "PF and ESI enrollment", status: "Completed", dueDate: "2024-02-02", completedDate: "2024-02-02" },
+      { task: "Set up salary account", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "Emergency contact form", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
       { task: "Workspace setup", status: "Pending", dueDate: "2024-02-05" },
       { task: "Team introduction meeting", status: "Pending", dueDate: "2024-02-06" },
     ],
@@ -501,8 +689,10 @@ export const mockOnboardingEmployees = [
     totalTasks: 12,
     manager: "Priya Sharma",
     buddy: "Arjun Patel",
-    salary: "₹20L",
+    salary: "₹24L",
     employeeId: "EMP002",
+    candidateId: 6,
+    jobId: 5,
     documents: {
       contract: "Completed",
       taxForms: "Completed",
@@ -512,18 +702,18 @@ export const mockOnboardingEmployees = [
       backgroundCheck: "Completed",
     },
     tasks: [
-      { task: "Sign employment contract", status: "Completed", dueDate: "2024-01-26" },
-      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-01-28" },
-      { task: "Complete Form 16 submission", status: "Completed", dueDate: "2024-01-28" },
-      { task: "Read employee handbook", status: "Completed", dueDate: "2024-01-29" },
-      { task: "IT equipment setup", status: "Completed", dueDate: "2024-01-30" },
-      { task: "Security training completion", status: "Completed", dueDate: "2024-02-01" },
-      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-01-28" },
-      { task: "PF and ESI enrollment", status: "Completed", dueDate: "2024-01-29" },
-      { task: "Set up salary account", status: "Completed", dueDate: "2024-01-28" },
-      { task: "Emergency contact form", status: "Completed", dueDate: "2024-01-28" },
-      { task: "Workspace setup", status: "Completed", dueDate: "2024-02-01" },
-      { task: "Team introduction meeting", status: "Completed", dueDate: "2024-02-02" },
+      { task: "Sign employment contract", status: "Completed", dueDate: "2024-01-26", completedDate: "2024-01-25" },
+      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-01-28", completedDate: "2024-01-28" },
+      { task: "Complete Form 16 submission", status: "Completed", dueDate: "2024-01-28", completedDate: "2024-01-28" },
+      { task: "Read employee handbook", status: "Completed", dueDate: "2024-01-29", completedDate: "2024-01-29" },
+      { task: "IT equipment setup", status: "Completed", dueDate: "2024-01-30", completedDate: "2024-01-30" },
+      { task: "Security training completion", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-01-28", completedDate: "2024-01-28" },
+      { task: "PF and ESI enrollment", status: "Completed", dueDate: "2024-01-29", completedDate: "2024-01-29" },
+      { task: "Set up salary account", status: "Completed", dueDate: "2024-01-28", completedDate: "2024-01-28" },
+      { task: "Emergency contact form", status: "Completed", dueDate: "2024-01-28", completedDate: "2024-01-28" },
+      { task: "Workspace setup", status: "Completed", dueDate: "2024-02-01", completedDate: "2024-02-01" },
+      { task: "Team introduction meeting", status: "Completed", dueDate: "2024-02-02", completedDate: "2024-02-02" },
     ],
   },
   {
@@ -541,6 +731,8 @@ export const mockOnboardingEmployees = [
     buddy: "Priya Patel",
     salary: "₹12L",
     employeeId: "EMP003",
+    candidateId: null,
+    jobId: null,
     documents: {
       contract: "Completed",
       taxForms: "Pending",
@@ -550,13 +742,13 @@ export const mockOnboardingEmployees = [
       backgroundCheck: "In Progress",
     },
     tasks: [
-      { task: "Sign employment contract", status: "Completed", dueDate: "2024-02-03" },
-      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-02-05" },
+      { task: "Sign employment contract", status: "Completed", dueDate: "2024-02-03", completedDate: "2024-02-03" },
+      { task: "Submit PAN and Aadhaar", status: "Completed", dueDate: "2024-02-05", completedDate: "2024-02-05" },
       { task: "Complete Form 16 submission", status: "Pending", dueDate: "2024-02-05" },
       { task: "Read employee handbook", status: "Pending", dueDate: "2024-02-06" },
       { task: "IT equipment setup", status: "Pending", dueDate: "2024-02-07" },
       { task: "Security training completion", status: "Pending", dueDate: "2024-02-09" },
-      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-02-05" },
+      { task: "Meet with direct manager", status: "Completed", dueDate: "2024-02-05", completedDate: "2024-02-05" },
       { task: "PF and ESI enrollment", status: "Pending", dueDate: "2024-02-06" },
       { task: "Set up salary account", status: "Pending", dueDate: "2024-02-05" },
       { task: "Emergency contact form", status: "Pending", dueDate: "2024-02-05" },
@@ -584,6 +776,8 @@ export const mockEmployees = [
     bankAccount: "HDFC Bank - ****1234",
     panNumber: "ABCDE1234F",
     pfNumber: "KA/BGE/12345/67890",
+    candidateId: 5,
+    jobId: 1,
   },
   {
     id: 2,
@@ -592,9 +786,9 @@ export const mockEmployees = [
     department: "Product",
     employeeId: "EMP002",
     joiningDate: "2024-01-28",
-    salary: 2000000, // ₹20L
-    deductions: 300000, // ₹3L
-    netPay: 1700000, // ₹17L
+    salary: 2400000, // ₹24L
+    deductions: 360000, // ₹3.6L
+    netPay: 2040000, // ₹20.4L
     status: "Active",
     lastPayroll: "2024-01-31",
     manager: "Priya Sharma",
@@ -602,6 +796,8 @@ export const mockEmployees = [
     bankAccount: "SBI - ****5678",
     panNumber: "FGHIJ5678K",
     pfNumber: "KA/BGE/12345/67891",
+    candidateId: 6,
+    jobId: 5,
   },
   {
     id: 3,
@@ -620,6 +816,8 @@ export const mockEmployees = [
     bankAccount: "ICICI Bank - ****9012",
     panNumber: "KLMNO9012P",
     pfNumber: "KA/BGE/12345/67892",
+    candidateId: null,
+    jobId: null,
   },
   {
     id: 4,
@@ -638,6 +836,8 @@ export const mockEmployees = [
     bankAccount: "Axis Bank - ****3456",
     panNumber: "PQRST3456U",
     pfNumber: "KA/BGE/12345/67893",
+    candidateId: null,
+    jobId: null,
   },
 ]
 
@@ -657,22 +857,24 @@ export const mockPayrollData = [
     totalDeductions: 53442, // ₹53,442
     netPay: 194891, // ₹1.95L
     payPeriod: "January 2024",
+    candidateId: 5,
   },
   {
     employee: "Meera Krishnan",
     employeeId: "EMP002",
-    baseSalary: 166667, // ₹1.67L monthly
+    baseSalary: 200000, // ₹2L monthly
     overtime: 0,
     bonus: 20000, // ₹20,000
     allowances: 12000, // ₹12,000
-    grossPay: 198667, // ₹1.99L
-    taxes: 29800, // ₹29,800
-    pf: 10000, // ₹10,000
-    esi: 994, // ₹994
+    grossPay: 232000, // ₹2.32L
+    taxes: 34800, // ₹34,800
+    pf: 12000, // ₹12,000
+    esi: 1160, // ₹1,160
     insurance: 2000, // ₹2,000
-    totalDeductions: 42794, // ₹42,794
-    netPay: 155873, // ₹1.56L
+    totalDeductions: 49960, // ₹49,960
+    netPay: 182040, // ₹1.82L
     payPeriod: "January 2024",
+    candidateId: 6,
   },
   {
     employee: "Rohit Agarwal",
@@ -689,6 +891,7 @@ export const mockPayrollData = [
     totalDeductions: 20205, // ₹20,205
     netPay: 100795, // ₹1.01L
     payPeriod: "January 2024",
+    candidateId: null,
   },
   {
     employee: "Ananya Iyer",
@@ -705,6 +908,7 @@ export const mockPayrollData = [
     totalDeductions: 38125, // ₹38,125
     netPay: 136875, // ₹1.37L
     payPeriod: "January 2024",
+    candidateId: null,
   },
 ]
 
@@ -719,6 +923,8 @@ export const mockNotifications = [
     priority: "high",
     actionRequired: true,
     link: "/interviews",
+    candidateId: 1,
+    jobId: 1,
   },
   {
     id: 2,
@@ -730,6 +936,8 @@ export const mockNotifications = [
     priority: "medium",
     actionRequired: true,
     link: "/candidates",
+    candidateId: 2,
+    jobId: 2,
   },
   {
     id: 3,
@@ -741,6 +949,8 @@ export const mockNotifications = [
     priority: "medium",
     actionRequired: true,
     link: "/onboarding",
+    candidateId: 5,
+    employeeId: "EMP001",
   },
   {
     id: 4,
@@ -752,6 +962,8 @@ export const mockNotifications = [
     priority: "high",
     actionRequired: false,
     link: "/candidates",
+    candidateId: 5,
+    jobId: 1,
   },
   {
     id: 5,
@@ -804,6 +1016,8 @@ export const mockRecentActivity = [
     time: "30 minutes ago",
     status: "completed",
     user: "Ravi Gupta",
+    candidateId: 7,
+    jobId: 3,
   },
   {
     id: 2,
@@ -813,6 +1027,8 @@ export const mockRecentActivity = [
     time: "2 hours ago",
     status: "new",
     user: "System",
+    candidateId: 4,
+    jobId: 4,
   },
   {
     id: 3,
@@ -822,6 +1038,8 @@ export const mockRecentActivity = [
     time: "4 hours ago",
     status: "pending",
     user: "Amit Kumar",
+    candidateId: 5,
+    jobId: 1,
   },
   {
     id: 4,
@@ -831,6 +1049,8 @@ export const mockRecentActivity = [
     time: "1 day ago",
     status: "completed",
     user: "HR Team",
+    candidateId: 6,
+    employeeId: "EMP002",
   },
   {
     id: 5,
@@ -840,6 +1060,7 @@ export const mockRecentActivity = [
     time: "2 days ago",
     status: "active",
     user: "Kavya Sharma",
+    jobId: 3,
   },
 ]
 
@@ -866,4 +1087,29 @@ export const mockCompanySettings = {
   founded: "2018",
   description:
     "Leading technology solutions provider specializing in web applications, mobile apps, and cloud services.",
+}
+
+// Helper functions to get related data
+export const getCandidatesByJobId = (jobId: number) => {
+  return mockCandidates.filter((candidate) => candidate.jobId === jobId)
+}
+
+export const getJobById = (jobId: number) => {
+  return mockJobs.find((job) => job.id === jobId)
+}
+
+export const getCandidateById = (candidateId: number) => {
+  return mockCandidates.find((candidate) => candidate.id === candidateId)
+}
+
+export const getInterviewsByCandidateId = (candidateId: number) => {
+  return mockInterviews.filter((interview) => interview.candidateId === candidateId)
+}
+
+export const getEmployeeByCandidateId = (candidateId: number) => {
+  return mockEmployees.find((employee) => employee.candidateId === candidateId)
+}
+
+export const getOnboardingByCandidateId = (candidateId: number) => {
+  return mockOnboardingEmployees.find((employee) => employee.candidateId === candidateId)
 }

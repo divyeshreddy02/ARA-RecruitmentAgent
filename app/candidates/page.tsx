@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,23 +23,125 @@ import {
   Briefcase,
   GraduationCap,
   Award,
+  ArrowRight,
+  Building,
+  DollarSign,
 } from "lucide-react"
-import { mockCandidates } from "@/lib/mock-data"
+import { mockCandidates, mockJobs, getJobById } from "@/lib/mock-data"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function Candidates() {
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [isScheduleOpen, setIsScheduleOpen] = useState(false)
+  const [filterJobId, setFilterJobId] = useState<string>("all")
+  const searchParams = useSearchParams()
 
-  // Replace the candidates array with:
-  const candidates = mockCandidates
+  useEffect(() => {
+    const candidateId = searchParams.get("candidateId")
+    const jobId = searchParams.get("jobId")
+
+    if (candidateId) {
+      const candidate = mockCandidates.find((c) => c.id === Number.parseInt(candidateId))
+      if (candidate) setSelectedCandidate(candidate)
+    }
+
+    if (jobId) {
+      setFilterJobId(jobId)
+    }
+  }, [searchParams])
+
+  const filteredCandidates =
+    filterJobId === "all"
+      ? mockCandidates
+      : mockCandidates.filter((candidate) => candidate.jobId === Number.parseInt(filterJobId))
+
+  const handleScheduleInterview = () => {
+    setIsScheduleOpen(false)
+    // In a real app, this would create an interview record
+    alert(`Interview scheduled for ${selectedCandidate?.name}`)
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Candidates</h1>
-        <p className="text-muted-foreground">
-          Review candidate profiles, ATS screening results, and schedule interviews
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Candidates</h1>
+          <p className="text-muted-foreground">
+            Review candidate profiles, ATS screening results, and schedule interviews
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Select value={filterJobId} onValueChange={setFilterJobId}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by job" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Positions</SelectItem>
+              {mockJobs.map((job) => (
+                <SelectItem key={job.id} value={job.id.toString()}>
+                  {job.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Candidate Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Candidates</p>
+                <p className="text-2xl font-bold">{filteredCandidates.length}</p>
+              </div>
+              <User className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Interview Ready</p>
+                <p className="text-2xl font-bold">
+                  {
+                    filteredCandidates.filter(
+                      (c) => c.status === "Interview Scheduled" || c.status === "Technical Round",
+                    ).length
+                  }
+                </p>
+              </div>
+              <Calendar className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">High Scores (90+)</p>
+                <p className="text-2xl font-bold">{filteredCandidates.filter((c) => c.score >= 90).length}</p>
+              </div>
+              <Star className="h-8 w-8 text-yellow-600" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Offers Extended</p>
+                <p className="text-2xl font-bold">
+                  {filteredCandidates.filter((c) => c.status === "Offer Extended").length}
+                </p>
+              </div>
+              <Award className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -47,51 +149,59 @@ export default function Candidates() {
         <div className="md:col-span-1 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Candidate Pipeline</CardTitle>
+              <CardTitle>Candidate Pipeline ({filteredCandidates.length})</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {candidates.map((candidate) => (
-                <div
-                  key={candidate.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedCandidate?.id === candidate.id ? "border-blue-500 bg-blue-50" : "hover:bg-gray-50"
-                  }`}
-                  onClick={() => setSelectedCandidate(candidate)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" />
+            <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+              {filteredCandidates.map((candidate) => {
+                const job = getJobById(candidate.jobId)
+                return (
+                  <div
+                    key={candidate.id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      selectedCandidate?.id === candidate.id ? "border-blue-500 bg-blue-50" : "hover:bg-gray-50"
+                    }`}
+                    onClick={() => setSelectedCandidate(candidate)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                          <User className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{candidate.name}</p>
+                          <p className="text-sm text-muted-foreground">{candidate.position}</p>
+                          {job && <p className="text-xs text-blue-600">{job.title}</p>}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{candidate.name}</p>
-                        <p className="text-sm text-muted-foreground">{candidate.position}</p>
+                      <Badge
+                        variant={
+                          candidate.status === "Interview Scheduled" || candidate.status === "Technical Round"
+                            ? "default"
+                            : candidate.status === "Offer Extended"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {candidate.status}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-medium">{candidate.score}% Match</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {candidate.location}
                       </div>
                     </div>
-                    <Badge
-                      variant={
-                        candidate.status === "Interview Scheduled"
-                          ? "default"
-                          : candidate.status === "Screened"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {candidate.status}
-                    </Badge>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium">{candidate.score}% Match</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {candidate.location}
+                    <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>{candidate.experience}</span>
+                      <span>{candidate.source}</span>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </CardContent>
           </Card>
         </div>
@@ -100,10 +210,11 @@ export default function Candidates() {
         <div className="md:col-span-2">
           {selectedCandidate ? (
             <Tabs defaultValue="profile" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="ats">ATS Score</TabsTrigger>
                 <TabsTrigger value="interview">Interview</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
                 <TabsTrigger value="schedule">Schedule</TabsTrigger>
               </TabsList>
 
@@ -140,10 +251,26 @@ export default function Candidates() {
                             <Briefcase className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">{selectedCandidate.experience} experience</span>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{selectedCandidate.currentCompany}</span>
+                          </div>
                         </div>
                       </div>
 
                       <div className="space-y-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Salary Details</span>
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <p>Current: {selectedCandidate.currentSalary}</p>
+                            <p>Expected: {selectedCandidate.expectedSalary}</p>
+                            <p>Notice Period: {selectedCandidate.noticePeriod}</p>
+                          </div>
+                        </div>
+
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <GraduationCap className="h-4 w-4 text-muted-foreground" />
@@ -171,6 +298,23 @@ export default function Candidates() {
                     <div>
                       <h4 className="font-medium mb-2">Professional Summary</h4>
                       <p className="text-sm text-muted-foreground">{selectedCandidate.summary}</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Link href={`/interviews?candidateId=${selectedCandidate.id}`}>
+                        <Button variant="outline">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          View Interviews
+                        </Button>
+                      </Link>
+                      {selectedCandidate.status === "Offer Extended" && (
+                        <Link href={`/onboarding?candidateId=${selectedCandidate.id}`}>
+                          <Button>
+                            <ArrowRight className="h-4 w-4 mr-2" />
+                            Start Onboarding
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -255,19 +399,17 @@ export default function Candidates() {
                       <div>
                         <h4 className="font-medium mb-2">Key Strengths</h4>
                         <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Strong technical background in required technologies</li>
-                          <li>• Proven leadership experience</li>
-                          <li>• Excellent communication skills</li>
-                          <li>• Cultural fit based on values assessment</li>
+                          {selectedCandidate.keyStrengths?.map((strength, index) => (
+                            <li key={index}>• {strength}</li>
+                          ))}
                         </ul>
                       </div>
                       <div>
                         <h4 className="font-medium mb-2">Areas to Explore</h4>
                         <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Experience with large-scale systems</li>
-                          <li>• Team management approach</li>
-                          <li>• Long-term career goals</li>
-                          <li>• Availability and start date</li>
+                          {selectedCandidate.areasToExplore?.map((area, index) => (
+                            <li key={index}>• {area}</li>
+                          ))}
                         </ul>
                       </div>
                     </div>
@@ -275,21 +417,47 @@ export default function Candidates() {
                     <div>
                       <h4 className="font-medium mb-2">Pre-Interview Q&A Summary</h4>
                       <div className="space-y-3">
-                        <div className="bg-gray-50 p-3 rounded">
-                          <p className="text-sm font-medium">Why are you interested in this role?</p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            "I'm excited about the opportunity to work with cutting-edge technologies and lead a team of
-                            talented engineers..."
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded">
-                          <p className="text-sm font-medium">What's your biggest professional achievement?</p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            "Led the migration of our monolithic architecture to microservices, reducing deployment time
-                            by 70%..."
-                          </p>
-                        </div>
+                        {selectedCandidate.interviewQuestions?.map((qa, index) => (
+                          <div key={index} className="bg-gray-50 p-3 rounded">
+                            <p className="text-sm font-medium">{qa.question}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{qa.answer}</p>
+                          </div>
+                        ))}
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="timeline" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Candidate Timeline</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {selectedCandidate.timeline?.map((event, index) => (
+                        <div key={index} className="flex items-center gap-4">
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              event.status === "completed"
+                                ? "bg-green-600"
+                                : event.status === "scheduled"
+                                  ? "bg-blue-600"
+                                  : "bg-gray-300"
+                            }`}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium">{event.event}</p>
+                              <p className="text-sm text-muted-foreground">{event.date}</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {event.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -367,9 +535,10 @@ export default function Candidates() {
                                   <SelectValue placeholder="Select interviewer" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="john">John Smith - Engineering Manager</SelectItem>
-                                  <SelectItem value="sarah">Sarah Johnson - Senior Engineer</SelectItem>
-                                  <SelectItem value="mike">Mike Davis - Tech Lead</SelectItem>
+                                  <SelectItem value="amit">Amit Kumar - CTO</SelectItem>
+                                  <SelectItem value="kavya">Kavya Sharma - Marketing Head</SelectItem>
+                                  <SelectItem value="ravi">Ravi Gupta - Design Lead</SelectItem>
+                                  <SelectItem value="suresh">Suresh Patel - DevOps Lead</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -383,7 +552,7 @@ export default function Candidates() {
                               <Button variant="outline" onClick={() => setIsScheduleOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button onClick={() => setIsScheduleOpen(false)}>Schedule Interview</Button>
+                              <Button onClick={handleScheduleInterview}>Schedule Interview</Button>
                             </div>
                           </div>
                         </DialogContent>
