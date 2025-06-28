@@ -14,6 +14,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 
 const menuItems = [
@@ -58,27 +60,28 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar className="border-r">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center gap-2">
-          <Building2 className="h-8 w-8 text-blue-600" />
-          <div>
-            <h2 className="text-lg font-semibold">RecruitAI</h2>
-            <p className="text-sm text-muted-foreground">Admin Dashboard</p>
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="border-b">
+        <div className="flex items-center gap-3 px-3 py-2">
+          <Building2 className="h-8 w-8 text-blue-600 flex-shrink-0" />
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <h2 className="text-lg font-semibold text-foreground truncate">RecruitAI</h2>
+            <p className="text-sm text-muted-foreground truncate">Admin Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                    <Link href={item.url} className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -87,6 +90,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t">
+        <div className="px-3 py-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+          <p className="truncate">© 2024 RecruitAI</p>
+        </div>
+      </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
   )
 }

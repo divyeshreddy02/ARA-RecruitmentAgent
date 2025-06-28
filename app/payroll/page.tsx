@@ -1,335 +1,456 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   DollarSign,
   Users,
-  Calculator,
-  FileText,
-  Download,
-  Eye,
+  Clock,
   TrendingUp,
-  Building,
-  CreditCard,
-  AlertCircle,
   CheckCircle,
+  XCircle,
+  AlertCircle,
+  Eye,
+  Download,
+  Filter,
+  Search,
+  Fingerprint,
+  Wifi,
+  WifiOff,
+  Settings,
 } from "lucide-react"
-import { mockEmployees, mockPayrollData, getCandidateById } from "@/lib/mock-data"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import { mockPayrollData, mockBiometricDevices, mockBiometricLogs } from "@/lib/mock-data"
 
-export default function PayrollManagement() {
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
-  const [isProcessPayrollOpen, setIsProcessPayrollOpen] = useState(false)
-  const searchParams = useSearchParams()
+export default function PayrollPage() {
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null)
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false)
 
-  useEffect(() => {
-    const employeeId = searchParams.get("employeeId")
-    if (employeeId) {
-      const employee = mockEmployees.find((e) => e.employeeId === employeeId)
-      if (employee) setSelectedEmployee(employee)
+  const totalEmployees = mockPayrollData.length
+  const totalPayroll = mockPayrollData.reduce((sum, emp) => sum + emp.netSalary, 0)
+  const avgAttendance =
+    mockPayrollData.reduce((sum, emp) => sum + (emp.attendance.present / emp.attendance.workingDays) * 100, 0) /
+    totalEmployees
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "present":
+        return "bg-green-100 text-green-800"
+      case "late":
+        return "bg-yellow-100 text-yellow-800"
+      case "absent":
+        return "bg-red-100 text-red-800"
+      case "leave":
+        return "bg-blue-100 text-blue-800"
+      default:
+        return "bg-gray-100 text-gray-800"
     }
-  }, [searchParams])
-
-  const employees = mockEmployees
-  const payrollData = mockPayrollData
-
-  const totalPayroll = payrollData.reduce((sum, emp) => sum + emp.netPay, 0)
-  const totalDeductions = payrollData.reduce((sum, emp) => sum + emp.totalDeductions, 0)
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
   }
 
+  const getDeviceStatusColor = (status: string) => {
+    switch (status) {
+      case "online":
+        return "text-green-600"
+      case "offline":
+        return "text-red-600"
+      case "maintenance":
+        return "text-yellow-600"
+      default:
+        return "text-gray-600"
+    }
+  }
+
+  const selectedEmployeeData = selectedEmployee
+    ? mockPayrollData.find((emp) => emp.employeeId === selectedEmployee)
+    : null
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Payroll Management</h1>
-          <p className="text-muted-foreground">Manage employee salaries, deductions, and payroll processing</p>
+          <h1 className="text-3xl font-bold tracking-tight">Payroll & Attendance</h1>
+          <p className="text-muted-foreground">Manage employee payroll and track attendance</p>
         </div>
-        <Dialog open={isProcessPayrollOpen} onOpenChange={setIsProcessPayrollOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Calculator className="h-4 w-4 mr-2" />
-              Process Payroll
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Process Monthly Payroll</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Pay Period</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select pay period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="feb-2024">February 2024</SelectItem>
-                    <SelectItem value="jan-2024">January 2024</SelectItem>
-                    <SelectItem value="dec-2023">December 2023</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Department</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All departments" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
-                    <SelectItem value="engineering">Engineering</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="design">Design</SelectItem>
-                    <SelectItem value="product">Product</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Payroll Summary</h4>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span>Total Employees:</span>
-                    <span className="font-medium">{employees.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Gross Payroll:</span>
-                    <span className="font-medium">{formatCurrency(totalPayroll + totalDeductions)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Deductions:</span>
-                    <span className="font-medium">{formatCurrency(totalDeductions)}</span>
-                  </div>
-                  <div className="flex justify-between font-medium">
-                    <span>Net Payroll:</span>
-                    <span>{formatCurrency(totalPayroll)}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsProcessPayrollOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => setIsProcessPayrollOpen(false)}>Process Payroll</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button size="sm">Process Payroll</Button>
+        </div>
       </div>
 
-      {/* Payroll Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
-                <p className="text-2xl font-bold">{employees.length}</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-600" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Active payroll</p>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalEmployees}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+2</span> from last month
+            </p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Monthly Payroll</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalPayroll).replace("₹", "₹")}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Net amount</p>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Payroll</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{(totalPayroll / 100000).toFixed(1)}L</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+8%</span> from last month
+            </p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Deductions</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalDeductions).replace("₹", "₹")}</p>
-              </div>
-              <Calculator className="h-8 w-8 text-orange-600" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">PF, ESI, Tax</p>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Attendance</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgAttendance.toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+2%</span> from last month
+            </p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg. Salary</p>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(totalPayroll / employees.length).replace("₹", "₹")}
-                </p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Overtime Hours</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {mockPayrollData.reduce((sum, emp) => sum + emp.attendance.overtime, 0)}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Per employee</p>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-red-600">+15%</span> from last month
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="employees" className="space-y-4">
+      {/* Main Content */}
+      <Tabs defaultValue="payroll" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="employees">Employee Payroll</TabsTrigger>
-          <TabsTrigger value="payslips">Payslips</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          <TabsTrigger value="biometric">Biometric Logs</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="employees" className="space-y-4">
+        {/* Payroll Tab */}
+        <TabsContent value="payroll" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Employee Payroll Overview</CardTitle>
+              <CardTitle>Employee Payroll</CardTitle>
+              <CardDescription>January 2024 payroll summary</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Base Salary</TableHead>
-                    <TableHead>Deductions</TableHead>
-                    <TableHead>Net Pay</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {employees.map((employee) => {
-                    const candidate = getCandidateById(employee.candidateId)
-                    return (
-                      <TableRow key={employee.id}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search employees..." className="pl-8" />
+                  </div>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Basic Salary</TableHead>
+                      <TableHead>Allowances</TableHead>
+                      <TableHead>Deductions</TableHead>
+                      <TableHead>Net Salary</TableHead>
+                      <TableHead>Attendance</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockPayrollData.map((employee) => (
+                      <TableRow key={employee.employeeId}>
                         <TableCell>
-                          <div>
-                            <p className="font-medium">{employee.name}</p>
-                            <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
-                            <p className="text-xs text-blue-600">{employee.position}</p>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {employee.employeeName
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{employee.employeeName}</p>
+                              <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>₹{employee.basicSalary.toLocaleString()}</TableCell>
+                        <TableCell>
+                          ₹
+                          {(
+                            employee.allowances.hra +
+                            employee.allowances.transport +
+                            employee.allowances.medical +
+                            employee.allowances.special
+                          ).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          ₹
+                          {(
+                            employee.deductions.pf +
+                            employee.deductions.esi +
+                            employee.deductions.tax +
+                            employee.deductions.other
+                          ).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="font-medium">₹{employee.netSalary.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={(employee.attendance.present / employee.attendance.workingDays) * 100}
+                              className="w-16 h-2"
+                            />
+                            <span className="text-sm">
+                              {((employee.attendance.present / employee.attendance.workingDays) * 100).toFixed(0)}%
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Building className="h-3 w-3" />
-                            {employee.department}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            {formatCurrency(employee.salary)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Calculator className="h-3 w-3" />
-                            {formatCurrency(employee.deductions)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <CreditCard className="h-3 w-3" />
-                            <span className="font-medium">{formatCurrency(employee.netPay)}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={employee.status === "Active" ? "default" : "secondary"}>
-                            {employee.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployee(employee)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            {candidate && (
-                              <Link href={`/candidates?candidateId=${candidate.id}`}>
-                                <Button variant="ghost" size="sm">
-                                  Profile
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="payslips" className="space-y-4">
+        {/* Attendance Tab */}
+        <TabsContent value="attendance" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Payslips - January 2024</CardTitle>
+              <CardTitle>Attendance Overview</CardTitle>
+              <CardDescription>Employee attendance tracking with biometric data</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Employee</TableHead>
-                    <TableHead>Base Salary</TableHead>
-                    <TableHead>Allowances</TableHead>
-                    <TableHead>Overtime</TableHead>
-                    <TableHead>Gross Pay</TableHead>
-                    <TableHead>Deductions</TableHead>
-                    <TableHead>Net Pay</TableHead>
+                    <TableHead>Working Days</TableHead>
+                    <TableHead>Present</TableHead>
+                    <TableHead>Absent</TableHead>
+                    <TableHead>Late Arrivals</TableHead>
+                    <TableHead>Overtime (hrs)</TableHead>
+                    <TableHead>Attendance %</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payrollData.map((payroll, index) => (
-                    <TableRow key={index}>
+                  {mockPayrollData.map((employee) => (
+                    <TableRow key={employee.employeeId}>
                       <TableCell>
-                        <div>
-                          <p className="font-medium">{payroll.employee}</p>
-                          <p className="text-sm text-muted-foreground">{payroll.employeeId}</p>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {employee.employeeName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{employee.employeeName}</p>
+                            <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>{formatCurrency(payroll.baseSalary)}</TableCell>
-                      <TableCell>{formatCurrency(payroll.allowances)}</TableCell>
-                      <TableCell>{formatCurrency(payroll.overtime)}</TableCell>
-                      <TableCell className="font-medium">{formatCurrency(payroll.grossPay)}</TableCell>
-                      <TableCell className="text-red-600">{formatCurrency(payroll.totalDeductions)}</TableCell>
-                      <TableCell className="font-bold text-green-600">{formatCurrency(payroll.netPay)}</TableCell>
+                      <TableCell>{employee.attendance.workingDays}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          {payroll.candidateId && (
-                            <Link href={`/candidates?candidateId=${payroll.candidateId}`}>
-                              <Button variant="ghost" size="sm">
-                                Profile
-                              </Button>
-                            </Link>
-                          )}
+                        <Badge variant="outline" className="bg-green-50 text-green-700">
+                          {employee.attendance.present}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-red-50 text-red-700">
+                          {employee.attendance.absent}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
+                          {employee.attendance.lateArrivals}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{employee.attendance.overtime}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={(employee.attendance.present / employee.attendance.workingDays) * 100}
+                            className="w-16 h-2"
+                          />
+                          <span className="text-sm font-medium">
+                            {((employee.attendance.present / employee.attendance.workingDays) * 100).toFixed(0)}%
+                          </span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Dialog
+                          open={attendanceModalOpen && selectedEmployee === employee.employeeId}
+                          onOpenChange={(open) => {
+                            setAttendanceModalOpen(open)
+                            if (!open) setSelectedEmployee(null)
+                          }}
+                        >
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployee(employee.employeeId)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Daily Attendance - {employee.employeeName}</DialogTitle>
+                              <DialogDescription>Detailed attendance records for the last 10 days</DialogDescription>
+                            </DialogHeader>
+
+                            {selectedEmployeeData && (
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+                                  <div className="text-center">
+                                    <p className="text-2xl font-bold text-green-600">
+                                      {selectedEmployeeData.attendance.present}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Present Days</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-2xl font-bold text-red-600">
+                                      {selectedEmployeeData.attendance.absent}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Absent Days</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-2xl font-bold text-yellow-600">
+                                      {selectedEmployeeData.attendance.lateArrivals}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Late Arrivals</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-2xl font-bold text-blue-600">
+                                      {selectedEmployeeData.attendance.overtime}h
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Overtime</p>
+                                  </div>
+                                </div>
+
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Date</TableHead>
+                                      <TableHead>Check In</TableHead>
+                                      <TableHead>Check Out</TableHead>
+                                      <TableHead>Hours</TableHead>
+                                      <TableHead>Overtime</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead>Device</TableHead>
+                                      <TableHead>Remarks</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {selectedEmployeeData.attendanceRecords.map((record, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell className="font-medium">
+                                          {new Date(record.date).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>
+                                          {record.checkIn ? (
+                                            <div className="flex items-center gap-2">
+                                              <CheckCircle className="h-4 w-4 text-green-600" />
+                                              {record.checkIn}
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center gap-2">
+                                              <XCircle className="h-4 w-4 text-red-600" />
+                                              --
+                                            </div>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          {record.checkOut ? (
+                                            <div className="flex items-center gap-2">
+                                              <CheckCircle className="h-4 w-4 text-green-600" />
+                                              {record.checkOut}
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center gap-2">
+                                              <XCircle className="h-4 w-4 text-red-600" />
+                                              --
+                                            </div>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>{record.hoursWorked.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                          {record.overtime > 0 ? (
+                                            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                              +{record.overtime.toFixed(2)}h
+                                            </Badge>
+                                          ) : (
+                                            "--"
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge className={getStatusColor(record.status)}>{record.status}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          {record.deviceId ? (
+                                            <div className="flex items-center gap-1">
+                                              <Fingerprint className="h-3 w-3" />
+                                              <span className="text-xs">{record.deviceId}</span>
+                                            </div>
+                                          ) : (
+                                            "--"
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                          {record.remarks || "--"}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -339,276 +460,117 @@ export default function PayrollManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reports" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Department-wise Payroll</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {Object.entries(
-                  employees.reduce(
-                    (acc, emp) => {
-                      acc[emp.department] = (acc[emp.department] || 0) + emp.netPay
-                      return acc
-                    },
-                    {} as Record<string, number>,
-                  ),
-                )
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([department, total]) => (
-                    <div key={department} className="flex items-center justify-between">
-                      <span className="font-medium">{department}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full">
-                          <div
-                            className="h-2 bg-blue-600 rounded-full"
-                            style={{
-                              width: `${
-                                (total /
-                                  Math.max(
-                                    ...Object.values(
-                                      employees.reduce(
-                                        (acc, emp) => {
-                                          acc[emp.department] = (acc[emp.department] || 0) + emp.netPay
-                                          return acc
-                                        },
-                                        {} as Record<string, number>,
-                                      ),
-                                    ),
-                                  )) *
-                                100
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <span className="font-bold text-sm">{formatCurrency(total)}</span>
-                      </div>
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Payroll Trends</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span>January 2024</span>
-                  <span className="font-bold">{formatCurrency(totalPayroll)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>December 2023</span>
-                  <span className="font-bold">{formatCurrency(totalPayroll * 0.95)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>November 2023</span>
-                  <span className="font-bold">{formatCurrency(totalPayroll * 0.92)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>October 2023</span>
-                  <span className="font-bold">{formatCurrency(totalPayroll * 0.88)}</span>
-                </div>
-                <div className="pt-2 border-t">
-                  <div className="flex justify-between items-center text-green-600">
-                    <span className="font-medium">Growth Rate</span>
-                    <span className="font-bold">+8.2%</span>
+        {/* Biometric Logs Tab */}
+        <TabsContent value="biometric" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            {mockBiometricDevices.map((device) => (
+              <Card key={device.id}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{device.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    {device.status === "online" ? (
+                      <Wifi className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
+                    ) : device.status === "offline" ? (
+                      <WifiOff className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
+                    ) : (
+                      <Settings className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
+                    )}
+                    <Badge variant={device.status === "online" ? "default" : "secondary"}>{device.status}</Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{device.location}</p>
+                    <div className="flex justify-between text-sm">
+                      <span>Total Scans:</span>
+                      <span className="font-medium">{device.totalScans}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Success Rate:</span>
+                      <span className="font-medium">{device.successRate}%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Last Sync:</span>
+                      <span className="font-medium">{new Date(device.lastSync).toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Payroll Reports</CardTitle>
+              <CardTitle>Recent Biometric Activity</CardTitle>
+              <CardDescription>Live feed of check-in/check-out events</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <FileText className="h-8 w-8 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Monthly Payroll Report</p>
-                    <p className="text-sm text-muted-foreground">Detailed breakdown by employee</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <Calculator className="h-8 w-8 text-green-600" />
-                  <div>
-                    <p className="font-medium">Tax Deduction Report</p>
-                    <p className="text-sm text-muted-foreground">TDS and tax calculations</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <Building className="h-8 w-8 text-purple-600" />
-                  <div>
-                    <p className="font-medium">PF & ESI Report</p>
-                    <p className="text-sm text-muted-foreground">Statutory compliance report</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="compliance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Compliance Dashboard
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">PF Compliance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600 mb-2">100%</div>
-                      <p className="text-sm text-muted-foreground">All employees enrolled</p>
-                      <Badge variant="default" className="mt-2">
-                        Compliant
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">ESI Compliance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600 mb-2">100%</div>
-                      <p className="text-sm text-muted-foreground">All eligible employees</p>
-                      <Badge variant="default" className="mt-2">
-                        Compliant
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">TDS Filing</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600 mb-2">Pending</div>
-                      <p className="text-sm text-muted-foreground">Due: 15th Feb</p>
-                      <Badge variant="destructive" className="mt-2">
-                        Action Required
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-4">Statutory Requirements</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span>Form 16 Generation</span>
-                    </div>
-                    <Badge variant="default">Completed</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span>PF Monthly Returns</span>
-                    </div>
-                    <Badge variant="default">Filed</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <AlertCircle className="h-4 w-4 text-orange-600" />
-                      <span>ESI Monthly Returns</span>
-                    </div>
-                    <Badge variant="destructive">Due Soon</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span>Professional Tax</span>
-                    </div>
-                    <Badge variant="default">Paid</Badge>
-                  </div>
-                </div>
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>Device</TableHead>
+                    <TableHead>Fingerprint</TableHead>
+                    <TableHead>Response Time</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockBiometricLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {log.employeeName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{log.employeeName}</p>
+                            <p className="text-sm text-muted-foreground">{log.employeeId}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={log.type === "check-in" ? "default" : "secondary"}>{log.type}</Badge>
+                      </TableCell>
+                      <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Fingerprint className="h-4 w-4" />
+                          {log.deviceLocation}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{log.fingerprintType}</Badge>
+                      </TableCell>
+                      <TableCell>{log.responseTime}s</TableCell>
+                      <TableCell>
+                        {log.success ? (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-green-600">Success</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-red-600" />
+                            <span className="text-red-600">Failed</span>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Employee Detail Modal */}
-      {selectedEmployee && (
-        <Dialog open={!!selectedEmployee} onOpenChange={() => setSelectedEmployee(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Payroll Details - {selectedEmployee.name}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Employee Information</Label>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p>
-                      <strong>Name:</strong> {selectedEmployee.name}
-                    </p>
-                    <p>
-                      <strong>ID:</strong> {selectedEmployee.employeeId}
-                    </p>
-                    <p>
-                      <strong>Position:</strong> {selectedEmployee.position}
-                    </p>
-                    <p>
-                      <strong>Department:</strong> {selectedEmployee.department}
-                    </p>
-                    <p>
-                      <strong>Joining Date:</strong> {selectedEmployee.joiningDate}
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Salary Breakdown</Label>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p>
-                      <strong>Base Salary:</strong> {formatCurrency(selectedEmployee.salary)}
-                    </p>
-                    <p>
-                      <strong>Deductions:</strong> {formatCurrency(selectedEmployee.deductions)}
-                    </p>
-                    <p>
-                      <strong>Net Pay:</strong> {formatCurrency(selectedEmployee.netPay)}
-                    </p>
-                    <p>
-                      <strong>Bank Account:</strong> {selectedEmployee.bankAccount}
-                    </p>
-                    <p>
-                      <strong>PAN:</strong> {selectedEmployee.panNumber}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Payslip
-                </Button>
-                <Button variant="outline" onClick={() => setSelectedEmployee(null)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   )
 }
