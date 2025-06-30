@@ -2,202 +2,176 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  DollarSign,
-  Users,
-  Clock,
-  TrendingUp,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Eye,
-  Download,
-  Filter,
-  Search,
-  Fingerprint,
-  Wifi,
-  WifiOff,
-  Settings,
-} from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Search,
+  Filter,
+  Download,
+  Eye,
+  Clock,
+  Users,
+  IndianRupee,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Fingerprint,
+  MapPin,
+} from "lucide-react"
 import { mockPayrollData, mockBiometricDevices, mockBiometricLogs } from "@/lib/mock-data"
 
 export default function PayrollPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null)
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false)
 
-  const totalEmployees = mockPayrollData.length
   const totalPayroll = mockPayrollData.reduce((sum, emp) => sum + emp.netSalary, 0)
   const avgAttendance =
     mockPayrollData.reduce((sum, emp) => sum + (emp.attendance.present / emp.attendance.workingDays) * 100, 0) /
-    totalEmployees
+    mockPayrollData.length
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "present":
-        return "bg-green-100 text-green-800"
-      case "late":
-        return "bg-yellow-100 text-yellow-800"
-      case "absent":
-        return "bg-red-100 text-red-800"
-      case "leave":
-        return "bg-blue-100 text-blue-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+    }).format(amount)
   }
 
-  const getDeviceStatusColor = (status: string) => {
-    switch (status) {
-      case "online":
-        return "text-green-600"
-      case "offline":
-        return "text-red-600"
-      case "maintenance":
-        return "text-yellow-600"
-      default:
-        return "text-gray-600"
-    }
+  const formatTime = (timeString: string) => {
+    return new Date(`2024-01-01T${timeString}`).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
   }
-
-  const selectedEmployeeData = selectedEmployee
-    ? mockPayrollData.find((emp) => emp.employeeId === selectedEmployee)
-    : null
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Payroll & Attendance</h1>
-          <p className="text-muted-foreground">Manage employee payroll and track attendance</p>
+          <h1 className="text-3xl font-bold">Payroll & Attendance</h1>
+          <p className="text-muted-foreground">Manage employee payroll and biometric attendance tracking</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm">
+        <div className="flex gap-2">
+          <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export Payroll
           </Button>
-          <Button size="sm">Process Payroll</Button>
+          <Button>Process Payroll</Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Overview Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+2</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Payroll</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{(totalPayroll / 100000).toFixed(1)}L</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+8%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Attendance</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgAttendance.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+2%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overtime Hours</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockPayrollData.reduce((sum, emp) => sum + emp.attendance.overtime, 0)}
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Payroll</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalPayroll)}</p>
+              </div>
+              <IndianRupee className="h-8 w-8 text-green-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-red-600">+15%</span> from last month
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">This month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Employees</p>
+                <p className="text-2xl font-bold">{mockPayrollData.length}</p>
+              </div>
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Active employees</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg. Attendance</p>
+                <p className="text-2xl font-bold">{avgAttendance.toFixed(1)}%</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">This month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Devices Online</p>
+                <p className="text-2xl font-bold">
+                  {mockBiometricDevices.filter((d) => d.status === "online").length}/{mockBiometricDevices.length}
+                </p>
+              </div>
+              <Fingerprint className="h-8 w-8 text-orange-600" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Biometric scanners</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content */}
       <Tabs defaultValue="payroll" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="biometric">Biometric Logs</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll Management</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance Tracking</TabsTrigger>
+          <TabsTrigger value="devices">Biometric Devices</TabsTrigger>
         </TabsList>
 
-        {/* Payroll Tab */}
         <TabsContent value="payroll" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Employee Payroll</CardTitle>
-              <CardDescription>January 2024 payroll summary</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Employee Payroll</CardTitle>
+                  <CardDescription>January 2024 payroll summary</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Search employees..." className="pl-10 w-64" />
+                  </div>
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search employees..." className="pl-8" />
-                  </div>
-                </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Basic Salary</TableHead>
+                    <TableHead>Allowances</TableHead>
+                    <TableHead>Deductions</TableHead>
+                    <TableHead>Attendance</TableHead>
+                    <TableHead>Net Salary</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockPayrollData.map((employee) => {
+                    const totalAllowances = Object.values(employee.allowances).reduce((sum, val) => sum + val, 0)
+                    const totalDeductions = Object.values(employee.deductions).reduce((sum, val) => sum + val, 0)
+                    const attendancePercentage = (employee.attendance.present / employee.attendance.workingDays) * 100
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Basic Salary</TableHead>
-                      <TableHead>Allowances</TableHead>
-                      <TableHead>Deductions</TableHead>
-                      <TableHead>Net Salary</TableHead>
-                      <TableHead>Attendance</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockPayrollData.map((employee) => (
+                    return (
                       <TableRow key={employee.employeeId}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
+                              <AvatarImage src="/placeholder-user.jpg" />
                               <AvatarFallback>
                                 {employee.employeeName
                                   .split(" ")
@@ -207,82 +181,447 @@ export default function PayrollPage() {
                             </Avatar>
                             <div>
                               <p className="font-medium">{employee.employeeName}</p>
-                              <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
+                              <p className="text-sm text-muted-foreground">ID: {employee.employeeId}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>₹{employee.basicSalary.toLocaleString()}</TableCell>
+                        <TableCell>{formatCurrency(employee.basicSalary)}</TableCell>
                         <TableCell>
-                          ₹
-                          {(
-                            employee.allowances.hra +
-                            employee.allowances.transport +
-                            employee.allowances.medical +
-                            employee.allowances.special
-                          ).toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          ₹
-                          {(
-                            employee.deductions.pf +
-                            employee.deductions.esi +
-                            employee.deductions.tax +
-                            employee.deductions.other
-                          ).toLocaleString()}
-                        </TableCell>
-                        <TableCell className="font-medium">₹{employee.netSalary.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Progress
-                              value={(employee.attendance.present / employee.attendance.workingDays) * 100}
-                              className="w-16 h-2"
-                            />
-                            <span className="text-sm">
-                              {((employee.attendance.present / employee.attendance.workingDays) * 100).toFixed(0)}%
-                            </span>
+                          <div className="text-sm">
+                            <p>{formatCurrency(totalAllowances)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              HRA: {formatCurrency(employee.allowances.hra)}
+                            </p>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <div className="text-sm">
+                            <p>{formatCurrency(totalDeductions)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              PF: {formatCurrency(employee.deductions.pf)}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16">
+                              <Progress value={attendancePercentage} className="h-2" />
+                            </div>
+                            <span className="text-sm font-medium">{attendancePercentage.toFixed(1)}%</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {employee.attendance.present}/{employee.attendance.workingDays} days
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium text-green-600">{formatCurrency(employee.netSalary)}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setSelectedEmployee(employee.employeeId)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Payroll Details - {employee.employeeName}</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                  <Card>
+                                    <CardHeader>
+                                      <CardTitle className="text-lg">Salary Breakdown</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                      <div className="flex justify-between">
+                                        <span>Basic Salary</span>
+                                        <span className="font-medium">{formatCurrency(employee.basicSalary)}</span>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <p className="font-medium text-green-600">Allowances</p>
+                                        <div className="pl-4 space-y-1">
+                                          <div className="flex justify-between text-sm">
+                                            <span>HRA</span>
+                                            <span>{formatCurrency(employee.allowances.hra)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>Transport</span>
+                                            <span>{formatCurrency(employee.allowances.transport)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>Medical</span>
+                                            <span>{formatCurrency(employee.allowances.medical)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>Special</span>
+                                            <span>{formatCurrency(employee.allowances.special)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <p className="font-medium text-red-600">Deductions</p>
+                                        <div className="pl-4 space-y-1">
+                                          <div className="flex justify-between text-sm">
+                                            <span>PF</span>
+                                            <span>{formatCurrency(employee.deductions.pf)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>ESI</span>
+                                            <span>{formatCurrency(employee.deductions.esi)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>Tax</span>
+                                            <span>{formatCurrency(employee.deductions.tax)}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span>Other</span>
+                                            <span>{formatCurrency(employee.deductions.other)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="border-t pt-4">
+                                        <div className="flex justify-between font-bold text-lg">
+                                          <span>Net Salary</span>
+                                          <span className="text-green-600">{formatCurrency(employee.netSalary)}</span>
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+
+                                  <Card>
+                                    <CardHeader>
+                                      <CardTitle className="text-lg">Attendance Summary</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                                          <p className="text-2xl font-bold text-green-600">
+                                            {employee.attendance.present}
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">Present Days</p>
+                                        </div>
+                                        <div className="text-center p-3 bg-red-50 rounded-lg">
+                                          <p className="text-2xl font-bold text-red-600">
+                                            {employee.attendance.absent}
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">Absent Days</p>
+                                        </div>
+                                        <div className="text-center p-3 bg-orange-50 rounded-lg">
+                                          <p className="text-2xl font-bold text-orange-600">
+                                            {employee.attendance.lateArrivals}
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">Late Arrivals</p>
+                                        </div>
+                                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                                          <p className="text-2xl font-bold text-blue-600">
+                                            {employee.attendance.overtime}
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">Overtime Hours</p>
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                          <span>Working Days</span>
+                                          <span className="font-medium">{employee.attendance.workingDays}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span>Attendance Rate</span>
+                                          <span className="font-medium">{attendancePercentage.toFixed(1)}%</span>
+                                        </div>
+                                        <Progress value={attendancePercentage} className="h-3" />
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+
+                                <Card className="mt-6">
+                                  <CardHeader>
+                                    <CardTitle className="text-lg">Daily Attendance Records</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="max-h-60 overflow-y-auto">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Check In</TableHead>
+                                            <TableHead>Check Out</TableHead>
+                                            <TableHead>Hours</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Device</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {employee.attendanceRecords.slice(0, 10).map((record, index) => (
+                                            <TableRow key={index}>
+                                              <TableCell>{record.date}</TableCell>
+                                              <TableCell>{record.checkIn ? formatTime(record.checkIn) : "-"}</TableCell>
+                                              <TableCell>
+                                                {record.checkOut ? formatTime(record.checkOut) : "-"}
+                                              </TableCell>
+                                              <TableCell>{record.hoursWorked.toFixed(2)}h</TableCell>
+                                              <TableCell>
+                                                <Badge
+                                                  variant={
+                                                    record.status === "present"
+                                                      ? "default"
+                                                      : record.status === "late"
+                                                        ? "destructive"
+                                                        : "secondary"
+                                                  }
+                                                >
+                                                  {record.status}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell>
+                                                <div className="flex items-center gap-1">
+                                                  <Fingerprint className="h-3 w-3" />
+                                                  <span className="text-xs">{record.deviceId || "-"}</span>
+                                                </div>
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </DialogContent>
+                            </Dialog>
+                            <Button variant="ghost" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="attendance" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Today's Attendance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Present</span>
+                    <Badge variant="default" className="bg-green-600">
+                      {mockPayrollData.length - 1}/{mockPayrollData.length}
+                    </Badge>
+                  </div>
+                  <Progress value={((mockPayrollData.length - 1) / mockPayrollData.length) * 100} className="h-3" />
+                  <div className="text-sm text-muted-foreground">1 employee absent today</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Late Arrivals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm">2 employees late today</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">Average late time: 25 minutes</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Overtime</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">15.5 hours this week</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">3 employees working overtime</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Live Attendance Activity</CardTitle>
+                <Button variant="outline" onClick={() => setAttendanceModalOpen(true)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {mockBiometricLogs.slice(0, 5).map((log) => (
+                  <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${log.success ? "bg-green-500" : "bg-red-500"}`} />
+                      <div>
+                        <p className="font-medium">{log.employeeName}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {log.type === "check-in" ? "Checked In" : "Checked Out"} • {log.deviceLocation}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {new Date(log.timestamp).toLocaleTimeString("en-IN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {log.success ? "Success" : "Failed"} • {log.responseTime}s
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Attendance Tab */}
-        <TabsContent value="attendance" className="space-y-4">
+        <TabsContent value="devices" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Attendance Overview</CardTitle>
-              <CardDescription>Employee attendance tracking with biometric data</CardDescription>
+              <CardTitle>Biometric Device Status</CardTitle>
+              <CardDescription>Monitor and manage biometric attendance devices</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Working Days</TableHead>
-                    <TableHead>Present</TableHead>
-                    <TableHead>Absent</TableHead>
-                    <TableHead>Late Arrivals</TableHead>
-                    <TableHead>Overtime (hrs)</TableHead>
-                    <TableHead>Attendance %</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockPayrollData.map((employee) => (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {mockBiometricDevices.map((device) => (
+                  <Card key={device.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Fingerprint className="h-5 w-5" />
+                          <span className="font-medium">{device.name}</span>
+                        </div>
+                        <Badge
+                          variant={
+                            device.status === "online"
+                              ? "default"
+                              : device.status === "offline"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {device.status}
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span>{device.location}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Today's Scans</p>
+                            <p className="font-medium">{device.totalScans}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Success Rate</p>
+                            <p className="font-medium">{device.successRate}%</p>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-muted-foreground">
+                          Last sync: {new Date(device.lastSync).toLocaleString("en-IN")}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Attendance Details Modal */}
+      <Dialog open={attendanceModalOpen} onOpenChange={setAttendanceModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Daily Attendance Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="font-medium">Present</p>
+                      <p className="text-2xl font-bold text-green-600">{mockPayrollData.length - 1}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="font-medium">Absent</p>
+                      <p className="text-2xl font-bold text-red-600">1</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-orange-600" />
+                    <div>
+                      <p className="font-medium">Late</p>
+                      <p className="text-2xl font-bold text-orange-600">2</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Check In</TableHead>
+                  <TableHead>Check Out</TableHead>
+                  <TableHead>Working Hours</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Device</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockPayrollData.map((employee) => {
+                  const todayRecord = employee.attendanceRecords[0] // Most recent record
+                  return (
                     <TableRow key={employee.employeeId}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
+                            <AvatarImage src="/placeholder-user.jpg" />
                             <AvatarFallback>
                               {employee.employeeName
                                 .split(" ")
@@ -290,287 +629,39 @@ export default function PayrollPage() {
                                 .join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-medium">{employee.employeeName}</p>
-                            <p className="text-sm text-muted-foreground">{employee.employeeId}</p>
-                          </div>
+                          <span className="font-medium">{employee.employeeName}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{employee.attendance.workingDays}</TableCell>
+                      <TableCell>{todayRecord?.checkIn ? formatTime(todayRecord.checkIn) : "-"}</TableCell>
+                      <TableCell>{todayRecord?.checkOut ? formatTime(todayRecord.checkOut) : "-"}</TableCell>
+                      <TableCell>{todayRecord ? `${todayRecord.hoursWorked.toFixed(2)}h` : "-"}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700">
-                          {employee.attendance.present}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-red-50 text-red-700">
-                          {employee.attendance.absent}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-                          {employee.attendance.lateArrivals}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{employee.attendance.overtime}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress
-                            value={(employee.attendance.present / employee.attendance.workingDays) * 100}
-                            className="w-16 h-2"
-                          />
-                          <span className="text-sm font-medium">
-                            {((employee.attendance.present / employee.attendance.workingDays) * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Dialog
-                          open={attendanceModalOpen && selectedEmployee === employee.employeeId}
-                          onOpenChange={(open) => {
-                            setAttendanceModalOpen(open)
-                            if (!open) setSelectedEmployee(null)
-                          }}
+                        <Badge
+                          variant={
+                            todayRecord?.status === "present"
+                              ? "default"
+                              : todayRecord?.status === "late"
+                                ? "destructive"
+                                : "secondary"
+                          }
                         >
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployee(employee.employeeId)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Daily Attendance - {employee.employeeName}</DialogTitle>
-                              <DialogDescription>Detailed attendance records for the last 10 days</DialogDescription>
-                            </DialogHeader>
-
-                            {selectedEmployeeData && (
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
-                                  <div className="text-center">
-                                    <p className="text-2xl font-bold text-green-600">
-                                      {selectedEmployeeData.attendance.present}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Present Days</p>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-2xl font-bold text-red-600">
-                                      {selectedEmployeeData.attendance.absent}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Absent Days</p>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-2xl font-bold text-yellow-600">
-                                      {selectedEmployeeData.attendance.lateArrivals}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Late Arrivals</p>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-2xl font-bold text-blue-600">
-                                      {selectedEmployeeData.attendance.overtime}h
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Overtime</p>
-                                  </div>
-                                </div>
-
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Date</TableHead>
-                                      <TableHead>Check In</TableHead>
-                                      <TableHead>Check Out</TableHead>
-                                      <TableHead>Hours</TableHead>
-                                      <TableHead>Overtime</TableHead>
-                                      <TableHead>Status</TableHead>
-                                      <TableHead>Device</TableHead>
-                                      <TableHead>Remarks</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {selectedEmployeeData.attendanceRecords.map((record, index) => (
-                                      <TableRow key={index}>
-                                        <TableCell className="font-medium">
-                                          {new Date(record.date).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>
-                                          {record.checkIn ? (
-                                            <div className="flex items-center gap-2">
-                                              <CheckCircle className="h-4 w-4 text-green-600" />
-                                              {record.checkIn}
-                                            </div>
-                                          ) : (
-                                            <div className="flex items-center gap-2">
-                                              <XCircle className="h-4 w-4 text-red-600" />
-                                              --
-                                            </div>
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
-                                          {record.checkOut ? (
-                                            <div className="flex items-center gap-2">
-                                              <CheckCircle className="h-4 w-4 text-green-600" />
-                                              {record.checkOut}
-                                            </div>
-                                          ) : (
-                                            <div className="flex items-center gap-2">
-                                              <XCircle className="h-4 w-4 text-red-600" />
-                                              --
-                                            </div>
-                                          )}
-                                        </TableCell>
-                                        <TableCell>{record.hoursWorked.toFixed(2)}</TableCell>
-                                        <TableCell>
-                                          {record.overtime > 0 ? (
-                                            <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                                              +{record.overtime.toFixed(2)}h
-                                            </Badge>
-                                          ) : (
-                                            "--"
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
-                                          <Badge className={getStatusColor(record.status)}>{record.status}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                          {record.deviceId ? (
-                                            <div className="flex items-center gap-1">
-                                              <Fingerprint className="h-3 w-3" />
-                                              <span className="text-xs">{record.deviceId}</span>
-                                            </div>
-                                          ) : (
-                                            "--"
-                                          )}
-                                        </TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">
-                                          {record.remarks || "--"}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
+                          {todayRecord?.status || "absent"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Fingerprint className="h-3 w-3" />
+                          <span className="text-xs">{todayRecord?.deviceId || "-"}</span>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Biometric Logs Tab */}
-        <TabsContent value="biometric" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            {mockBiometricDevices.map((device) => (
-              <Card key={device.id}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{device.name}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    {device.status === "online" ? (
-                      <Wifi className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
-                    ) : device.status === "offline" ? (
-                      <WifiOff className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
-                    ) : (
-                      <Settings className={`h-4 w-4 ${getDeviceStatusColor(device.status)}`} />
-                    )}
-                    <Badge variant={device.status === "online" ? "default" : "secondary"}>{device.status}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">{device.location}</p>
-                    <div className="flex justify-between text-sm">
-                      <span>Total Scans:</span>
-                      <span className="font-medium">{device.totalScans}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Success Rate:</span>
-                      <span className="font-medium">{device.successRate}%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Last Sync:</span>
-                      <span className="font-medium">{new Date(device.lastSync).toLocaleTimeString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Biometric Activity</CardTitle>
-              <CardDescription>Live feed of check-in/check-out events</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Device</TableHead>
-                    <TableHead>Fingerprint</TableHead>
-                    <TableHead>Response Time</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockBiometricLogs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {log.employeeName
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{log.employeeName}</p>
-                            <p className="text-sm text-muted-foreground">{log.employeeId}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={log.type === "check-in" ? "default" : "secondary"}>{log.type}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Fingerprint className="h-4 w-4" />
-                          {log.deviceLocation}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{log.fingerprintType}</Badge>
-                      </TableCell>
-                      <TableCell>{log.responseTime}s</TableCell>
-                      <TableCell>
-                        {log.success ? (
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-green-600">Success</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-red-600" />
-                            <span className="text-red-600">Failed</span>
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

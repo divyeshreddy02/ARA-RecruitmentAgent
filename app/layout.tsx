@@ -6,13 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TopNavbar } from "@/components/top-navbar"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/sonner"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "RecruitAI - Automatic Recruitment Agent System",
-  description: "AI-powered recruitment and HR management system",
+  title: "Automatic Recruitment Agent System",
+  description: "Complete HR management and recruitment system",
     generator: 'v0.dev'
 }
 
@@ -29,7 +29,7 @@ export default function RootLayout({
             <AppSidebar />
             <SidebarInset>
               <TopNavbar />
-              <main className="flex-1 space-y-4 p-4 md:p-6 lg:p-8">{children}</main>
+              <main className="flex-1 space-y-4 p-4 md:p-8 pt-6">{children}</main>
             </SidebarInset>
           </SidebarProvider>
           <Toaster />

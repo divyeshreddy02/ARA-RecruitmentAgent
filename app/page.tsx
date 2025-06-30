@@ -4,19 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Users, Briefcase, Calendar, UserPlus, Clock, CheckCircle, BarChart3 } from "lucide-react"
+import { Users, Briefcase, Calendar, UserCheck, CheckCircle } from "lucide-react"
 import { mockDashboardStats, mockRecentActivity, mockPipelineData, mockOnboardingEmployees } from "@/lib/mock-data"
 
 export default function Dashboard() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's what's happening with your recruitment process.</p>
+        <p className="text-muted-foreground">Welcome to your recruitment management system</p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -28,7 +27,6 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">{mockDashboardStats.activeJobs} active positions</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
@@ -36,10 +34,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockDashboardStats.totalCandidates}</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <p className="text-xs text-muted-foreground">Across all positions</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Interviews Scheduled</CardTitle>
@@ -50,11 +47,10 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">This week</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Onboarding</CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockDashboardStats.onboardingInProgress}</div>
@@ -63,59 +59,67 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        {/* Recruitment Pipeline */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        {/* Pipeline Overview */}
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Recruitment Pipeline
-            </CardTitle>
+            <CardTitle>Recruitment Pipeline</CardTitle>
             <CardDescription>Current status of candidates in the recruitment process</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockPipelineData.map((stage) => (
-                <div key={stage.stage} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stage.color }} />
-                    <span className="font-medium">{stage.stage}</span>
+          <CardContent className="space-y-4">
+            {mockPipelineData.map((stage, index) => (
+              <div key={stage.stage} className="flex items-center space-x-4">
+                <div className="w-20 text-sm font-medium">{stage.stage}</div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-muted-foreground">{stage.count} candidates</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold">{stage.count}</span>
-                    <span className="text-sm text-muted-foreground">candidates</span>
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{
+                        backgroundColor: stage.color,
+                        width: `${(stage.count / mockPipelineData[0].count) * 100}%`,
+                      }}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
         {/* Recent Activity */}
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Recent Activity
-            </CardTitle>
+            <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest updates from your recruitment process</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockRecentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3">
-                  <div className="mt-1">
-                    {activity.type === "interview" && <Calendar className="h-4 w-4 text-blue-500" />}
-                    {activity.type === "application" && <Users className="h-4 w-4 text-green-500" />}
-                    {activity.type === "onboarding" && <CheckCircle className="h-4 w-4 text-purple-500" />}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">{activity.message}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
+          <CardContent className="space-y-4">
+            {mockRecentActivity.map((activity) => (
+              <div key={activity.id} className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  {activity.type === "interview" && <Calendar className="h-4 w-4 text-blue-500 mt-0.5" />}
+                  {activity.type === "application" && <Users className="h-4 w-4 text-green-500 mt-0.5" />}
+                  {activity.type === "onboarding" && <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5" />}
                 </div>
-              ))}
-            </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{activity.message}</p>
+                  <p className="text-xs text-muted-foreground">{activity.time}</p>
+                </div>
+                <Badge
+                  variant={
+                    activity.status === "completed"
+                      ? "default"
+                      : activity.status === "scheduled"
+                        ? "secondary"
+                        : "outline"
+                  }
+                >
+                  {activity.status}
+                </Badge>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>
@@ -123,17 +127,14 @@ export default function Dashboard() {
       {/* Onboarding Progress */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Onboarding Progress
-          </CardTitle>
+          <CardTitle>Onboarding Progress</CardTitle>
           <CardDescription>Track new employee onboarding completion</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {mockOnboardingEmployees.map((employee) => (
-              <div key={employee.id} className="flex items-center gap-4">
-                <Avatar>
+              <div key={employee.id} className="flex items-center space-x-4">
+                <Avatar className="h-10 w-10">
                   <AvatarImage src={employee.avatar || "/placeholder.svg"} alt={employee.name} />
                   <AvatarFallback>
                     {employee.name
@@ -142,17 +143,16 @@ export default function Dashboard() {
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{employee.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {employee.position} • {employee.department}
-                      </p>
+                      <p className="text-sm font-medium leading-none">{employee.name}</p>
+                      <p className="text-sm text-muted-foreground">{employee.position}</p>
                     </div>
-                    <Badge variant={employee.status === "completed" ? "default" : "secondary"}>
-                      {employee.progress}% Complete
-                    </Badge>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{employee.progress}%</p>
+                      <p className="text-xs text-muted-foreground">Started {employee.startDate}</p>
+                    </div>
                   </div>
                   <Progress value={employee.progress} className="h-2" />
                 </div>
